@@ -1,76 +1,17 @@
-const express = require("express")
-    , hbs = require('express-handlebars')
-    , app = express()
-    , path = require("path")
-    , mongoose = require("mongoose")
-    , users = require("./model/users.js")
-    , bodyParser = require("body-parser");
+const express        = require('express');
+const MongoClient    = require('mongodb').MongoClient;
+const bodyParser     = require('body-parser');
+const app            = express();
+const db = require('./config/db');
 
-mongoose.Promise = global.Promise;
+app.use(bodyParser.urlencoded({ extended: true }));
 
+MongoClient.connect(db.url,(err,database) =>{
 
-mongoose.connect("mongodb://Edgar779:lenta12345678910@ds231941.mlab.com:31941/mydb");
+    if (err) return console.log(err)
+    require('./app/routes')(app, database);
+    app.listen(3000,() => {
+        console.log("We are live on");
+    });
 
-app.engine('hbs', hbs({extname: 'hbs', defaultLayout: 'main', layoutsDir: __dirname + '/view/'}));
-app.set('views', path.join(__dirname, '/view'));
-app.set("view engine", "hbs");
-
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
-
-app.use(express.static(__dirname + '/public'));
-
-app.get("/", function (req, res) {
-    res.render("addUser");
-});
-
-app.post("/", function (req, res) {
-console.log(typeof req.body.user.name);
-    let newUser = new users();
-    try {
-        users.create({name: req.body.user.name, surname: req.body.user.surname, email: req.body.user.email});
-    } catch (err) {
-        res.send(err);
-    }
-    res.render("addUser");
-});
-
-app.get("/showUsers", function (req, res) {
-    users.find({})
-        .exec()
-        .then(result => {
-            //console.log(result);
-            res.render("showUsers", {result: result});
-        })
-        .catch(err => {
-           // console.log(err);
-            res.send(500)(err);
-        });
-});
-
-app.delete('/showUsers', (req, res) => {
-    users.findOneAndRemove({_id: req.body.id})
-        .exec()
-        .then(() => res.end()
-        )
-        .catch(err => {
-            res.send(err);
-        });
-});
-
-app.put('/edit', function (req, res) {
-    users.findByIdAndUpdate(req.body.id, req.body, {new: true})
-        .exec()
-        .then((user) => {
-            user.name = req.body.name;
-            user.surname = req.body.surname;
-            user.email = req.body.email;
-            res.end();
-        })
-        .catch((err) => res.send(err));
-});
-
-app.listen(3000, function () {
-    console.log("server run");
 });
