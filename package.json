@@ -10,13 +10,16 @@
     "nodemon": "^1.18.3",
     "react": "^16.4.1"
   },
+  "keywords":[
+    "heroku"
+  ],
   "main": "index.js",
   "devDependencies": {},
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "EDGAR",
+  "license": "MIT",
   "description": ""
 }
